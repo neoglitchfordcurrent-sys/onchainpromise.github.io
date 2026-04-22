@@ -6,733 +6,289 @@
 <title>NORUG — The Promise Is On-Chain</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --red: #E8321A;
-    --black: #080808;
-    --white: #F0EDE8;
-    --grey: #1A1A1A;
-    --mid: #2A2A2A;
-    --dim: #666;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--black);
-    color: var(--white);
-    font-family: 'Space Mono', monospace;
-    overflow-x: hidden;
-    cursor: crosshair;
-  }
-
-  /* Grain overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 999;
-    opacity: 0.4;
-  }
-
-  /* Nav */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-    border-bottom: 1px solid #1f1f1f;
-    background: rgba(8,8,8,0.92);
-    backdrop-filter: blur(8px);
-  }
-
-  .nav-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 4px;
-    color: var(--white);
-    text-decoration: none;
-  }
-
-  .nav-logo span { color: var(--red); }
-
-  .nav-links {
-    display: flex;
-    gap: 32px;
-    list-style: none;
-  }
-
-  .nav-links a {
-    color: var(--dim);
-    text-decoration: none;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: color 0.2s;
-  }
-
-  .nav-links a:hover { color: var(--white); }
-
-  /* Hero */
-  .hero {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding-top: 80px;
-  }
-
-  .hero-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 80px 40px 80px 60px;
-    border-right: 1px solid #1f1f1f;
-  }
-
-  .hero-tag {
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--red);
-    text-transform: uppercase;
-    margin-bottom: 24px;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .hero-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(72px, 9vw, 140px);
-    line-height: 0.9;
-    letter-spacing: -2px;
-    animation: fadeUp 0.7s ease 0.1s both;
-  }
-
-  .hero-title .strike {
-    position: relative;
-    color: var(--dim);
-  }
-
-  .hero-title .strike::after {
-    content: '';
-    position: absolute;
-    left: 0; right: 0;
-    top: 50%;
-    height: 6px;
-    background: var(--red);
-    transform: rotate(-2deg);
-  }
-
-  .hero-subtitle {
-    margin-top: 32px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    line-height: 1.9;
-    color: var(--dim);
-    max-width: 400px;
-    animation: fadeUp 0.7s ease 0.2s both;
-  }
-
-  .hero-subtitle strong { color: var(--white); }
-
-  .hero-cta {
-    margin-top: 48px;
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    animation: fadeUp 0.7s ease 0.3s both;
-  }
-
-  .btn-primary {
-    background: var(--red);
-    color: var(--white);
-    border: none;
-    padding: 14px 32px;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: crosshair;
-    text-decoration: none;
-    transition: opacity 0.2s, transform 0.2s;
-    display: inline-block;
-  }
-
-  .btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--dim);
-    border: 1px solid #2a2a2a;
-    padding: 14px 32px;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: crosshair;
-    text-decoration: none;
-    transition: border-color 0.2s, color 0.2s;
-    display: inline-block;
-  }
-
-  .btn-secondary:hover { border-color: var(--white); color: var(--white); }
-
-  /* Hero right — the rug visual */
-  .hero-right {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 80px 40px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .rug-visual {
-    position: relative;
-    width: 280px;
-    height: 280px;
-    animation: fadeUp 0.8s ease 0.2s both;
-  }
-
-  .rug-circle {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: var(--grey);
-    border: 2px solid #2a2a2a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .rug-emoji {
-    font-size: 100px;
-    filter: grayscale(0.3);
-  }
-
-  .rug-x {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .rug-x svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .rug-border {
-    position: absolute;
-    inset: -8px;
-    border-radius: 50%;
-    border: 2px solid var(--red);
-    animation: pulse 3s ease-in-out infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.4; transform: scale(1.03); }
-  }
-
-  .ticker-strip {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    overflow: hidden;
-    padding: 14px 0;
-    background: var(--red);
-    border-top: 1px solid rgba(255,255,255,0.1);
-  }
-
-  .ticker-inner {
-    display: flex;
-    gap: 40px;
-    animation: ticker 18s linear infinite;
-    white-space: nowrap;
-  }
-
-  .ticker-inner span {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--white);
-    opacity: 0.9;
-  }
-
-  @keyframes ticker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  /* Promise section */
-  .promise {
-    padding: 120px 60px;
-    border-top: 1px solid #1f1f1f;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 80px;
-    align-items: start;
-  }
-
-  .section-label {
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--red);
-    text-transform: uppercase;
-    padding-top: 8px;
-  }
-
-  .promise-lines {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .promise-line {
-    display: flex;
-    align-items: baseline;
-    gap: 20px;
-    padding: 28px 0;
-    border-bottom: 1px solid #1a1a1a;
-    opacity: 0;
-    animation: fadeUp 0.5s ease both;
-  }
-
-  .promise-line:nth-child(1) { animation-delay: 0.1s; }
-  .promise-line:nth-child(2) { animation-delay: 0.2s; }
-  .promise-line:nth-child(3) { animation-delay: 0.3s; }
-  .promise-line:nth-child(4) { animation-delay: 0.4s; }
-
-  .line-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 48px;
-    color: #1f1f1f;
-    min-width: 60px;
-    line-height: 1;
-  }
-
-  .line-text {
-    font-family: 'DM Mono', monospace;
-    font-size: 15px;
-    line-height: 1.6;
-    color: var(--dim);
-  }
-
-  .line-text strong {
-    display: block;
-    font-size: 18px;
-    color: var(--white);
-    margin-bottom: 4px;
-    font-weight: 500;
-  }
-
-  /* Mechanics section */
-  .mechanics {
-    padding: 0 60px 120px;
-    border-top: 1px solid #1f1f1f;
-  }
-
-  .mechanics-header {
-    padding: 80px 0 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    border-bottom: 1px solid #1a1a1a;
-  }
-
-  .mechanics-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 72px;
-    line-height: 1;
-    letter-spacing: -1px;
-  }
-
-  .mechanics-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    margin-top: 0;
-  }
-
-  .mech-card {
-    padding: 48px 32px;
-    border-right: 1px solid #1a1a1a;
-    border-bottom: 1px solid #1a1a1a;
-    transition: background 0.3s;
-  }
-
-  .mech-card:last-child { border-right: none; }
-  .mech-card:hover { background: #0f0f0f; }
-
-  .mech-pct {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 64px;
-    line-height: 1;
-    color: var(--red);
-    margin-bottom: 16px;
-  }
-
-  .mech-title {
-    font-size: 11px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--white);
-    margin-bottom: 12px;
-  }
-
-  .mech-desc {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    line-height: 1.8;
-    color: var(--dim);
-  }
-
-  /* Chain proof section */
-  .chain-proof {
-    padding: 120px 60px;
-    border-top: 1px solid #1f1f1f;
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 80px;
-    align-items: center;
-  }
-
-  .chain-statement {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(36px, 5vw, 72px);
-    line-height: 1;
-    letter-spacing: -1px;
-  }
-
-  .chain-statement .highlight {
-    color: var(--red);
-    display: block;
-  }
-
-  .chain-right {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
-
-  .chain-item {
-    padding: 20px;
-    border: 1px solid #1a1a1a;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    transition: border-color 0.2s;
-  }
-
-  .chain-item:hover { border-color: var(--red); }
-
-  .chain-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--red);
-    flex-shrink: 0;
-    animation: blink 2s ease-in-out infinite;
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.2; }
-  }
-
-  .chain-item-text {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    line-height: 1.6;
-    color: var(--dim);
-  }
-
-  /* Footer */
-  footer {
-    padding: 48px 60px;
-    border-top: 1px solid #1f1f1f;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .footer-left {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px;
-    letter-spacing: 4px;
-  }
-
-  .footer-left span { color: var(--red); }
-
-  .footer-right {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--dim);
-    text-align: right;
-    line-height: 1.8;
-  }
-
-  .footer-right a {
-    color: var(--dim);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .footer-right a:hover { color: var(--white); }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* CA box */
-  .ca-box {
-    margin-top: 40px;
-    padding: 20px 24px;
-    border: 1px solid #2a2a2a;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    animation: fadeUp 0.7s ease 0.4s both;
-    background: #0f0f0f;
-  }
-
-  .ca-label {
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--dim);
-    text-transform: uppercase;
-    display: block;
-    margin-bottom: 6px;
-  }
-
-  .ca-address {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--white);
-    word-break: break-all;
-  }
-
-  .ca-copy {
-    background: none;
-    border: 1px solid #2a2a2a;
-    color: var(--dim);
-    padding: 8px 16px;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: crosshair;
-    white-space: nowrap;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-
-  .ca-copy:hover { border-color: var(--red); color: var(--red); }
-
-  @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; }
-    .hero-right { display: none; }
-    .promise { grid-template-columns: 1fr; gap: 32px; }
-    .mechanics-grid { grid-template-columns: 1fr; }
-    .mech-card { border-right: none; }
-    .chain-proof { grid-template-columns: 1fr; }
-    nav { padding: 16px 20px; }
-    .hero-left { padding: 60px 20px; }
-    .promise, .mechanics, .chain-proof { padding-left: 20px; padding-right: 20px; }
-    footer { flex-direction: column; gap: 24px; text-align: center; }
-  }
+:root { --red: #E8321A; --black: #080808; --white: #F0EDE8; --grey: #1A1A1A; --mid: #2A2A2A; --dim: #666; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--black); color: var(--white); font-family: 'Space Mono', monospace; overflow-x: hidden; cursor: crosshair; }
+body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 999; opacity: 0.4; }
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #1f1f1f; background: rgba(8,8,8,0.92); backdrop-filter: blur(8px); }
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--white); text-decoration: none; }
+.nav-logo span { color: var(--red); }
+.nav-links { display: flex; gap: 32px; list-style: none; }
+.nav-links a { color: var(--dim); text-decoration: none; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; transition: color 0.2s; }
+.nav-links a:hover { color: var(--white); }
+.hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; padding-top: 80px; }
+.hero-left { display: flex; flex-direction: column; justify-content: center; padding: 80px 40px 80px 60px; border-right: 1px solid #1f1f1f; }
+.hero-tag { font-size: 10px; letter-spacing: 4px; color: var(--red); text-transform: uppercase; margin-bottom: 24px; animation: fadeUp 0.6s ease both; }
+.hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(72px, 9vw, 140px); line-height: 0.9; letter-spacing: -2px; animation: fadeUp 0.7s ease 0.1s both; }
+.hero-title .strike { position: relative; color: var(--dim); }
+.hero-title .strike::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 6px; background: var(--red); transform: rotate(-2deg); }
+.hero-subtitle { margin-top: 32px; font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.9; color: var(--dim); max-width: 400px; animation: fadeUp 0.7s ease 0.2s both; }
+.hero-subtitle strong { color: var(--white); }
+.hero-cta { margin-top: 48px; display: flex; gap: 16px; flex-wrap: wrap; animation: fadeUp 0.7s ease 0.3s both; }
+.btn-primary { background: var(--red); color: var(--white); border: none; padding: 14px 32px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: crosshair; text-decoration: none; transition: opacity 0.2s, transform 0.2s; display: inline-block; }
+.btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
+.btn-secondary { background: transparent; color: var(--dim); border: 1px solid #2a2a2a; padding: 14px 32px; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; cursor: crosshair; text-decoration: none; transition: border-color 0.2s, color 0.2s; display: inline-block; }
+.btn-secondary:hover { border-color: var(--white); color: var(--white); }
+.hero-right { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 80px 40px; position: relative; overflow: hidden; }
+.rug-visual { position: relative; width: 280px; height: 280px; animation: fadeUp 0.8s ease 0.2s both; }
+.rug-circle { width: 100%; height: 100%; border-radius: 50%; background: var(--grey); border: 2px solid #2a2a2a; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.rug-emoji { font-size: 100px; filter: grayscale(0.3); }
+.rug-x { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.rug-x svg { width: 100%; height: 100%; }
+.rug-border { position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--red); animation: pulse 3s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.03); } }
+.ticker-strip { position: absolute; bottom: 0; left: 0; right: 0; overflow: hidden; padding: 14px 0; background: var(--red); border-top: 1px solid rgba(255,255,255,0.1); }
+.ticker-inner { display: flex; gap: 40px; animation: ticker 22s linear infinite; white-space: nowrap; }
+.ticker-inner span { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--white); opacity: 0.9; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.promise { padding: 120px 60px; border-top: 1px solid #1f1f1f; display: grid; grid-template-columns: 1fr 2fr; gap: 80px; align-items: start; }
+.section-label { font-size: 10px; letter-spacing: 4px; color: var(--red); text-transform: uppercase; padding-top: 8px; }
+.promise-lines { display: flex; flex-direction: column; gap: 0; }
+.promise-line { display: flex; align-items: baseline; gap: 20px; padding: 28px 0; border-bottom: 1px solid #1a1a1a; opacity: 0; animation: fadeUp 0.5s ease both; }
+.promise-line:nth-child(1) { animation-delay: 0.1s; }
+.promise-line:nth-child(2) { animation-delay: 0.2s; }
+.promise-line:nth-child(3) { animation-delay: 0.3s; }
+.promise-line:nth-child(4) { animation-delay: 0.4s; }
+.promise-line:nth-child(5) { animation-delay: 0.5s; }
+.line-num { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: #1f1f1f; min-width: 60px; line-height: 1; }
+.line-text { font-family: 'DM Mono', monospace; font-size: 15px; line-height: 1.6; color: var(--dim); }
+.line-text strong { display: block; font-size: 18px; color: var(--white); margin-bottom: 4px; font-weight: 500; }
+.mechanics { padding: 0 60px 120px; border-top: 1px solid #1f1f1f; }
+.mechanics-header { padding: 80px 0 60px; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #1a1a1a; }
+.mechanics-title { font-family: 'Bebas Neue', sans-serif; font-size: 72px; line-height: 1; letter-spacing: -1px; }
+.mechanics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 0; }
+.mech-card { padding: 48px 32px; border-right: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; transition: background 0.3s; }
+.mech-card:last-child { border-right: none; }
+.mech-card:hover { background: #0f0f0f; }
+.mech-pct { font-family: 'Bebas Neue', sans-serif; font-size: 64px; line-height: 1; color: var(--red); margin-bottom: 16px; }
+.mech-title { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--white); margin-bottom: 12px; }
+.mech-desc { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8; color: var(--dim); }
+.chain-proof { padding: 120px 60px; border-top: 1px solid #1f1f1f; display: grid; grid-template-columns: 2fr 1fr; gap: 80px; align-items: center; }
+.chain-statement { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 5vw, 72px); line-height: 1; letter-spacing: -1px; }
+.chain-statement .highlight { color: var(--red); display: block; }
+.chain-right { display: flex; flex-direction: column; gap: 24px; }
+.chain-item { padding: 20px; border: 1px solid #1a1a1a; display: flex; align-items: center; gap: 16px; transition: border-color 0.2s; }
+.chain-item:hover { border-color: var(--red); }
+.chain-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; animation: blink 2s ease-in-out infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+.chain-item-text { font-family: 'DM Mono', monospace; font-size: 11px; line-height: 1.6; color: var(--dim); }
+.beta-banner { padding: 80px 60px; border-top: 1px solid #1f1f1f; background: #0a0a0a; text-align: center; }
+.beta-label { font-size: 10px; letter-spacing: 4px; color: var(--red); text-transform: uppercase; margin-bottom: 20px; }
+.beta-text { font-family: 'Bebas Neue', sans-serif; font-size: clamp(24px, 3vw, 40px); line-height: 1.2; letter-spacing: -0.5px; color: var(--white); max-width: 900px; margin: 0 auto; }
+.beta-sub { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8; color: var(--dim); margin-top: 24px; max-width: 640px; margin-left: auto; margin-right: auto; }
+.beta-sub a { color: var(--red); text-decoration: none; }
+.beta-sub a:hover { color: var(--white); }
+footer { padding: 48px 60px; border-top: 1px solid #1f1f1f; display: flex; justify-content: space-between; align-items: center; }
+.footer-left { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 4px; }
+.footer-left span { color: var(--red); }
+.footer-right { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--dim); text-align: right; line-height: 1.8; }
+.footer-right a { color: var(--dim); text-decoration: none; transition: color 0.2s; }
+.footer-right a:hover { color: var(--white); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.ca-box { margin-top: 40px; padding: 20px 24px; border: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between; gap: 16px; animation: fadeUp 0.7s ease 0.4s both; background: #0f0f0f; }
+.ca-label { font-size: 9px; letter-spacing: 3px; color: var(--dim); text-transform: uppercase; display: block; margin-bottom: 6px; }
+.ca-address { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--white); word-break: break-all; }
+.ca-copy { background: none; border: 1px solid #2a2a2a; color: var(--dim); padding: 8px 16px; font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: crosshair; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+.ca-copy:hover { border-color: var(--red); color: var(--red); }
+@media (max-width: 900px) { .hero { grid-template-columns: 1fr; } .hero-right { display: none; } .promise { grid-template-columns: 1fr; gap: 32px; } .mechanics-grid { grid-template-columns: 1fr; } .mech-card { border-right: none; } .chain-proof { grid-template-columns: 1fr; } nav { padding: 16px 20px; } .hero-left { padding: 60px 20px; } .promise, .mechanics, .chain-proof, .beta-banner { padding-left: 20px; padding-right: 20px; } footer { flex-direction: column; gap: 24px; text-align: center; } }
 </style>
 </head>
 <body>
-
 <nav>
-  <a href="#" class="nav-logo">NO<span>RUG</span></a>
-  <ul class="nav-links">
-    <li><a href="#promise">Promise</a></li>
-    <li><a href="#mechanics">Mechanics</a></li>
-    <li><a href="#proof">Proof</a></li>
-    <li><a href="https://x.com/OnChainPromise" target="_blank">@OnChainPromise</a></li>
-  </ul>
+<a href="#" class="nav-logo">NO<span>RUG</span></a>
+<ul class="nav-links">
+<li><a href="#promise">Promise</a></li>
+<li><a href="#mechanics">Mechanics</a></li>
+<li><a href="#proof">Proof</a></li>
+<li><a href="https://x.com/OnChainPromise" target="_blank">@OnChainPromise</a></li>
+</ul>
 </nav>
 
 <section class="hero">
-  <div class="hero-left">
-    <p class="hero-tag">$NORUG — Solana — On-Chain Promise</p>
-    <h1 class="hero-title">
-      THE<br>
-      <span class="strike">RUG</span><br>
-      STOPS<br>
-      HERE.
-    </h1>
-    <p class="hero-subtitle">
-      The developer will not shill.<br>
-      The developer will not build the community.<br>
-      The developer will not control the narrative.<br><br>
-      <strong>This coin is a gift.</strong>
-    </p>
-    <div class="ca-box">
-      <div>
-        <span class="ca-label">Contract Address</span>
-        <span class="ca-address" id="ca-text">Launching soon — CA drops at @OnChainPromise</span>
-      </div>
-      <button class="ca-copy" onclick="copyCA()">Copy</button>
-    </div>
-    <div class="hero-cta">
-      <a href="https://pump.fun" target="_blank" class="btn-primary">Buy on Pump.fun</a>
-      <a href="https://x.com/OnChainPromise" target="_blank" class="btn-secondary">Follow @OnChainPromise</a>
-    </div>
-  </div>
-
-  <div class="hero-right">
-    <div class="rug-visual">
-      <div class="rug-border"></div>
-      <div class="rug-circle">
-        <span class="rug-emoji">🪄</span>
-        <div class="rug-x">
-          <svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="140" cy="140" r="130" stroke="#E8321A" stroke-width="3" opacity="0.15"/>
-            <line x1="40" y1="40" x2="240" y2="240" stroke="#E8321A" stroke-width="12" stroke-linecap="round"/>
-            <line x1="240" y1="40" x2="40" y2="240" stroke="#E8321A" stroke-width="12" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="ticker-strip">
-    <div class="ticker-inner">
-      <span>NO RUG</span><span>•</span>
-      <span>ON-CHAIN PROMISE</span><span>•</span>
-      <span>DEV HOLDS 20%</span><span>•</span>
-      <span>80% BACK TO TRADERS</span><span>•</span>
-      <span>CASH BACK ON</span><span>•</span>
-      <span>THE CHAIN IS THE RECEIPT</span><span>•</span>
-      <span>NO RUG</span><span>•</span>
-      <span>ON-CHAIN PROMISE</span><span>•</span>
-      <span>DEV HOLDS 20%</span><span>•</span>
-      <span>80% BACK TO TRADERS</span><span>•</span>
-      <span>CASH BACK ON</span><span>•</span>
-      <span>THE CHAIN IS THE RECEIPT</span><span>•</span>
-    </div>
-  </div>
+<div class="hero-left">
+<p class="hero-tag">$NORUG — Solana — On-Chain Promise — Beta Coin</p>
+<h1 class="hero-title">
+THE<br>
+<span class="strike">RUG</span><br>
+STOPS<br>
+HERE.
+</h1>
+<p class="hero-subtitle">
+The developer will not shill.<br>
+The developer will not build the community.<br>
+The developer will not control the narrative.<br><br>
+<strong>This coin is a gift.</strong>
+</p>
+<div class="ca-box">
+<div>
+<span class="ca-label">Contract Address</span>
+<span class="ca-address" id="ca-text">Launching soon — CA drops at @OnChainPromise</span>
+</div>
+<button class="ca-copy" onclick="copyCA()">Copy</button>
+</div>
+<div class="hero-cta">
+<a href="https://pump.fun" target="_blank" class="btn-primary">Buy on Pump.fun</a>
+<a href="https://x.com/OnChainPromise" target="_blank" class="btn-secondary">Follow @OnChainPromise</a>
+</div>
+</div>
+<div class="hero-right">
+<div class="rug-visual">
+<div class="rug-border"></div>
+<div class="rug-circle">
+<span class="rug-emoji">🪄</span>
+<div class="rug-x">
+<svg viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="140" cy="140" r="130" stroke="#E8321A" stroke-width="3" opacity="0.15"/>
+<line x1="40" y1="40" x2="240" y2="240" stroke="#E8321A" stroke-width="12" stroke-linecap="round"/>
+<line x1="240" y1="40" x2="40" y2="240" stroke="#E8321A" stroke-width="12" stroke-linecap="round"/>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<div class="ticker-strip">
+<div class="ticker-inner">
+<span>NO RUG</span><span>•</span>
+<span>ON-CHAIN PROMISE</span><span>•</span>
+<span>DEV HOLDS 20%</span><span>•</span>
+<span>80% TO TOP 8 HOLDERS</span><span>•</span>
+<span>AT BONDED</span><span>•</span>
+<span>ONE TX / EIGHT OUTPUTS</span><span>•</span>
+<span>THE CHAIN IS THE RECEIPT</span><span>•</span>
+<span>NO RUG</span><span>•</span>
+<span>ON-CHAIN PROMISE</span><span>•</span>
+<span>DEV HOLDS 20%</span><span>•</span>
+<span>80% TO TOP 8 HOLDERS</span><span>•</span>
+<span>AT BONDED</span><span>•</span>
+<span>ONE TX / EIGHT OUTPUTS</span><span>•</span>
+<span>THE CHAIN IS THE RECEIPT</span><span>•</span>
+</div>
+</div>
 </section>
 
 <section class="promise" id="promise">
-  <div class="section-label">The Promise</div>
-  <div class="promise-lines">
-    <div class="promise-line">
-      <span class="line-num">01</span>
-      <div class="line-text">
-        <strong>Dev holds 20%. That's it.</strong>
-        Before a single token is sold, the remaining 80% of dev holdings is distributed to the community.
-      </div>
-    </div>
-    <div class="promise-line">
-      <span class="line-num">02</span>
-      <div class="line-text">
-        <strong>Top 8 fee generators get the split.</strong>
-        The wallets producing the most SOL in global fees earn the largest share of the dev allocation.
-      </div>
-    </div>
-    <div class="promise-line">
-      <span class="line-num">03</span>
-      <div class="line-text">
-        <strong>Everything is in the traders' hands.</strong>
-        If a community forms, it belongs to them. If it runs, they ran it. Dev steps back completely.
-      </div>
-    </div>
-    <div class="promise-line">
-      <span class="line-num">04</span>
-      <div class="line-text">
-        <strong>This is Coin 1. Proof lives on-chain.</strong>
-        Every future coin from this dev carries the same promise. The consistency is the proof.
-      </div>
-    </div>
-  </div>
+<div class="section-label">The Promise</div>
+<div class="promise-lines">
+<div class="promise-line">
+<span class="line-num">01</span>
+<div class="line-text">
+<strong>Dev holds 20%. That's it.</strong>
+Before a single token is sold, the remaining 80% of dev holdings is distributed to the community.
+</div>
+</div>
+<div class="promise-line">
+<span class="line-num">02</span>
+<div class="line-text">
+<strong>Top 8 holders take the 80%.</strong>
+At the moment the bonding curve bonds, the eight wallets holding the most $NORUG receive the dev allocation. One transaction, eight outputs. No filters, no exceptions.
+</div>
+</div>
+<div class="promise-line">
+<span class="line-num">03</span>
+<div class="line-text">
+<strong>Everything is in the traders' hands.</strong>
+If a community forms, it belongs to them. If it runs, they ran it. Dev steps back completely.
+</div>
+</div>
+<div class="promise-line">
+<span class="line-num">04</span>
+<div class="line-text">
+<strong>This is the Beta Coin. Proof lives on-chain.</strong>
+NORUG is Coin 1. The core promise — 20% dev, 80% back to the trenches — carries to every future coin. Consistency is the proof.
+</div>
+</div>
+<div class="promise-line">
+<span class="line-num">05</span>
+<div class="line-text">
+<strong>The mechanic evolves with the trenches.</strong>
+NORUG's distribution is locked — no edits, no exceptions. Future coins iterate. Bot exclusion, holder weighting, trigger tuning — built with community input. Drop ideas in the comments at <a href="https://x.com/OnChainPromise" target="_blank" style="color:var(--red);text-decoration:none;">@OnChainPromise</a>.
+</div>
+</div>
+</div>
 </section>
 
 <section class="mechanics" id="mechanics">
-  <div class="mechanics-header">
-    <h2 class="mechanics-title">How It<br>Works</h2>
-    <span class="section-label">Mechanics</span>
-  </div>
-  <div class="mechanics-grid">
-    <div class="mech-card">
-      <div class="mech-pct">20%</div>
-      <div class="mech-title">Dev Allocation</div>
-      <p class="mech-desc">Dev keeps 20% of dev holdings. Skin in the game. Not a dump fund. This wallet is public and traceable.</p>
-    </div>
-    <div class="mech-card">
-      <div class="mech-pct">80%</div>
-      <div class="mech-title">Community Distribution</div>
-      <p class="mech-desc">Before any dev sell, 80% of dev holdings goes to the top 8 wallets generating the most SOL fees on this token.</p>
-    </div>
-    <div class="mech-card">
-      <div class="mech-pct">∞</div>
-      <div class="mech-title">Future Coins</div>
-      <p class="mech-desc">Every future coin from this dev follows the same rule. NORUG is Coin 1. The pattern is the proof. The chain remembers.</p>
-    </div>
-  </div>
+<div class="mechanics-header">
+<h2 class="mechanics-title">How It<br>Works</h2>
+<span class="section-label">Mechanics</span>
+</div>
+<div class="mechanics-grid">
+<div class="mech-card">
+<div class="mech-pct">20%</div>
+<div class="mech-title">Dev Allocation</div>
+<p class="mech-desc">Dev keeps 20% of dev holdings. Skin in the game, not a dump fund. Dev wallet address published at launch and excluded from distribution automatically.</p>
+</div>
+<div class="mech-card">
+<div class="mech-pct">80%</div>
+<div class="mech-title">Top 8 Holders · At Bonded</div>
+<p class="mech-desc">At the moment the curve bonds, 80% of dev holdings distributes to the top 8 $NORUG holders in a single transaction. Eight outputs, one block, fully verifiable on Solscan.</p>
+</div>
+<div class="mech-card">
+<div class="mech-pct">∞</div>
+<div class="mech-title">Beta Coin / Evolving Mechanic</div>
+<p class="mech-desc">NORUG is Coin 1. The core 20/80 promise locks forever. The mechanic details iterate — filter bots, weight holders, refine triggers — built with the trenches. Consistency is the proof.</p>
+</div>
+</div>
 </section>
 
 <section class="chain-proof" id="proof">
-  <div class="chain-statement">
-    THE CHAIN<br>
-    <span class="highlight">IS THE</span>
-    RECEIPT.
-  </div>
-  <div class="chain-right">
-    <div class="chain-item">
-      <div class="chain-dot"></div>
-      <div class="chain-item-text">Dev wallet visible on-chain at all times. Every transaction is permanent and public.</div>
-    </div>
-    <div class="chain-item">
-      <div class="chain-dot" style="animation-delay:0.5s"></div>
-      <div class="chain-item-text">Distribution to top 8 fee wallets happens before any dev sell. Verifiable by anyone.</div>
-    </div>
-    <div class="chain-item">
-      <div class="chain-dot" style="animation-delay:1s"></div>
-      <div class="chain-item-text">Cash back enabled at creation. Creator rewards flow directly to traders, not dev.</div>
-    </div>
-    <div class="chain-item">
-      <div class="chain-dot" style="animation-delay:1.5s"></div>
-      <div class="chain-item-text">No rugs. No exceptions. No excuses. The promise is permanent.</div>
-    </div>
-  </div>
+<div class="chain-statement">
+THE CHAIN<br>
+<span class="highlight">IS THE</span>
+RECEIPT.
+</div>
+<div class="chain-right">
+<div class="chain-item">
+<div class="chain-dot"></div>
+<div class="chain-item-text">Dev wallet published at launch and visible on-chain at all times. Every transaction permanent and public.</div>
+</div>
+<div class="chain-item">
+<div class="chain-dot" style="animation-delay:0.5s"></div>
+<div class="chain-item-text">Distribution to top 8 holder wallets fires at bonded in one transaction. Eight outputs. Verifiable by anyone.</div>
+</div>
+<div class="chain-item">
+<div class="chain-dot" style="animation-delay:1s"></div>
+<div class="chain-item-text">Cash back enabled at creation. Creator rewards flow directly to traders, not dev.</div>
+</div>
+<div class="chain-item">
+<div class="chain-dot" style="animation-delay:1.5s"></div>
+<div class="chain-item-text">No rugs. No exceptions. No excuses. The promise is permanent.</div>
+</div>
+</div>
+</section>
+
+<section class="beta-banner">
+<div class="beta-label">⚠ Beta Coin Notice</div>
+<p class="beta-text">
+NORUG is the Beta Coin. The mechanic is locked — no filters, no exceptions, no edits. Future coins iterate: bot exclusion, holder weighting, trigger refinement — built with the trenches.
+</p>
+<p class="beta-sub">
+Drop requests and ideas at <a href="https://x.com/OnChainPromise" target="_blank">@OnChainPromise</a>. The next mechanic is built with the majority. The promise stays the same — the mechanic gets sharper.
+</p>
 </section>
 
 <footer>
-  <div class="footer-left">NO<span>RUG</span></div>
-  <div class="footer-right">
-    <a href="https://x.com/OnChainPromise" target="_blank">@OnChainPromise</a><br>
-    Built on Solana · Launched on Pump.fun<br>
-    The rug stops here.
-  </div>
+<div class="footer-left">NO<span>RUG</span></div>
+<div class="footer-right">
+<a href="https://x.com/OnChainPromise" target="_blank">@OnChainPromise</a><br>
+Built on Solana · Launched on Pump.fun<br>
+The rug stops here.
+</div>
 </footer>
 
 <script>
 function copyCA() {
-  const ca = document.getElementById('ca-text').textContent;
-  if (ca.includes('Launching soon')) {
-    alert('CA not live yet — follow @OnChainPromise for the drop');
-    return;
-  }
-  navigator.clipboard.writeText(ca).then(() => {
-    const btn = document.querySelector('.ca-copy');
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy', 2000);
-  });
+const ca = document.getElementById('ca-text').textContent;
+if (ca.includes('Launching soon')) {
+alert('CA not live yet — follow @OnChainPromise for the drop');
+return;
+}
+navigator.clipboard.writeText(ca).then(() => {
+const btn = document.querySelector('.ca-copy');
+btn.textContent = 'Copied!';
+setTimeout(() => btn.textContent = 'Copy', 2000);
+});
 }
 </script>
-
 </body>
 </html>
